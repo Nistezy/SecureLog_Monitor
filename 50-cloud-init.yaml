@@ -15,7 +15,6 @@ network:
       nameservers:
         addresses:
           - 192.168.1.1
-          - 8.8.8.8
           - 2804:a:b:c::1
         search:
           - nistezy.local
