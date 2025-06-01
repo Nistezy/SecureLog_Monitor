@@ -1,0 +1,14 @@
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    enp0s3:
+      dhcp4: no
+      dhcp6: no
+  enp0s8:
+    dhcp4: yes
+    dhcp6: yes
+    addresses: [192.168.1.1/24, 2804:a:b:c::1/64]
+    nameservers:
+            addresses: [192.168.1.1, 2804:a:b:c::1]
+            search: [nistezy.local]
