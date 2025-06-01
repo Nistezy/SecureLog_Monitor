@@ -1,0 +1,48 @@
+# Arquivo de configuração DHCPv6
+
+# Define este servidor como autoritativo na rede
+authoritative;
+
+# Tempo padrão de concessão do endereço (30 dias)
+default-lease-time 2592000;    # 30 dias
+
+# Tempo preferido de uso do endereço (7 dias)
+preferred-lifetime 604800;     # 7 dias
+
+# Tempo antes de iniciar a renovação (1 hora)
+option dhcp-renewal-time 3600; # 1 hora
+
+# Tempo antes de iniciar a re-binding se a renovação falhar (2 horas)
+option dhcp-rebinding-time 7200; # 2 horas
+
+# Habilita troca rápida de pacotes DHCP (2 pacotes)
+option dhcp6.rapid-commit;
+
+# Definição de servidores DNS IPv6
+option dhcp6.name-servers 2804:a:b:c::1;
+# option dhcp6.name-servers 2804:a:b:c::1, 2001:4860:4860::8888; # Exemplo com DNS externo (Google)
+
+# Domínio de busca local
+option dhcp6.domain-search "nistezy.local";
+
+# Definição da subnet IPv6
+subnet6 2804:a:b:c::/64 {
+# Range de endereços a serem atribuídos aos clientes
+range6 2804:a:b:c::100 2804:a:b:c::200;
+
+# Geração de endereços temporários (RFC 4941 - privacidade)
+range6 2804:a:b:c:: temporary;
+
+# Prefix delegation - delegação de blocos /64 para clientes (Ex.: roteadores downstream)
+prefix6 2804:a:b:c:1:: 2804:a:b:c:ffff:: /64;
+
+# OBS: Ajuste os ranges conforme a necessidade no futuro
+}
+
+# -----------------------------
+# Exemplos de hosts fixos
+# -----------------------------
+# host cliente1 {
+#     host-identifier option dhcp6.client-id 00:01:00:01:23:45:67:89:ab:cd:ef:01:23:45;
+#     fixed-address6 2804:a:b:c::abcd;
+# }
