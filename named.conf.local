@@ -1,21 +1,20 @@
-//
+GNU nano 7.2                                                                      /etc/bind/named.conf.local
 // Do any local configuration here
-//
 
 // Consider adding the 1918 zones here, if they are not used in your
 // organization
-//include "/etc/bind/zones.rfc1918";
+// include "/etc/bind/zones.rfc1918";
 
-//Zona direta
+// Zona direta
 zone "nistezy.local" {
 type master;
-file    "/etc/bind/nistezy.local.foward";
+file "/etc/bind/nistezy.local.forward";    // Corrigido o nome do arquivo: "forward" em vez de "foward"
 allow-transfer { 192.168.1.2; };
 };
 
-//Zone reversa
+// Zona reversa
 zone "1.168.192.in-addr.arpa" {
 type master;
-file    "/etc/bind/nistezy.local.reverse";
-allow-transfer  {192.168.1.2; };
+file "/etc/bind/nistezy.local.reverse";
+allow-transfer { 192.168.1.2; };
 };
