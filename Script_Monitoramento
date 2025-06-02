@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import re
 import csv
 import time
@@ -9,7 +10,6 @@ from datetime import datetime
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
-# Configurações
 class Config:
     LOG_FILES = {
         'auth': '/var/log/auth.log',
@@ -20,9 +20,8 @@ class Config:
     OUTPUT_CSV = 'monitoramento_logs.csv'
     FAIL_LOGIN_PATTERN = re.compile(r'Failed password for .* from (\d+\.\d+\.\d+\.\d+)')
     MODIFICATION_KEYWORDS = ['modified', 'changed', 'updated']
-    CHECK_INTERVAL = 1  # segundos
+    CHECK_INTERVAL = 1
 
-# Configuração de logging
 def setup_logging():
     logging.basicConfig(
         level=logging.INFO,
@@ -33,7 +32,6 @@ def setup_logging():
         ]
     )
 
-# Verificação de arquivos e permissões
 def check_files_and_permissions():
     for file_type, file_path in Config.LOG_FILES.items():
         if not os.path.exists(file_path):
@@ -45,7 +43,6 @@ def check_files_and_permissions():
         if not os.path.exists(file_path):
             logging.warning(f"Arquivo para monitoramento não encontrado: {file_path}")
 
-# Função para registrar eventos
 def log_event(evento):
     file_exists = os.path.isfile(Config.OUTPUT_CSV)
     try:
@@ -59,7 +56,6 @@ def log_event(evento):
     except Exception as e:
         logging.error(f"Erro ao escrever no CSV: {e}")
 
-# Monitoramento de logs com tratamento de rotatividade
 def tail_log(file_path, pattern=None, tipo=''):
     last_position = 0
     while True:
@@ -70,7 +66,7 @@ def tail_log(file_path, pattern=None, tipo=''):
                 continue
 
             current_size = os.path.getsize(file_path)
-            if current_size < last_position:  # Arquivo foi rotacionado
+            if current_size < last_position:
                 last_position = 0
 
             with open(file_path, 'r') as f:
@@ -98,7 +94,6 @@ def tail_log(file_path, pattern=None, tipo=''):
             logging.error(f"Erro crítico lendo {file_path}: {e}")
             time.sleep(10)
 
-# Monitoramento do histórico do bash
 def monitor_bash_history():
     last_size = os.path.getsize(Config.LOG_FILES['bash']) if os.path.exists(Config.LOG_FILES['bash']) else 0
     
@@ -124,7 +119,7 @@ def monitor_bash_history():
                             }
                             log_event(evento)
                 last_size = current_size
-            elif current_size < last_size:  # Arquivo foi truncado ou rotacionado
+            elif current_size < last_size:
                 last_size = 0
                 
             time.sleep(Config.CHECK_INTERVAL)
@@ -132,7 +127,6 @@ def monitor_bash_history():
             logging.error(f"Erro monitorando bash_history: {e}")
             time.sleep(5)
 
-# Handler para monitoramento de arquivos
 class FileChangeHandler(FileSystemEventHandler):
     def __init__(self):
         self.last_modified = {}
@@ -153,18 +147,16 @@ class FileChangeHandler(FileSystemEventHandler):
         if event.src_path in Config.MONITOR_FILES:
             current_time = time.time()
             
-            # Prevenir múltiplos eventos rápidos
             if event.src_path in self.last_modified:
                 if current_time - self.last_modified[event.src_path] < 2:
                     return
             
-            # Calcular hash para verificar mudança real
             current_hash = self.calculate_hash(event.src_path)
             if current_hash is None:
                 return
                 
             if event.src_path in self.last_hashes and current_hash == self.last_hashes[event.src_path]:
-                return  # Nenhuma mudança real no conteúdo
+                return
                 
             self.last_modified[event.src_path] = current_time
             self.last_hashes[event.src_path] = current_hash
@@ -178,7 +170,6 @@ class FileChangeHandler(FileSystemEventHandler):
             }
             log_event(evento)
 
-# Gerenciador principal
 class MonitorManager:
     def __init__(self):
         self.threads = []
@@ -187,7 +178,6 @@ class MonitorManager:
     def start_monitoring(self):
         check_files_and_permissions()
         
-        # Iniciar threads para monitorar logs
         self.threads.append(threading.Thread(
             target=tail_log,
             args=(Config.LOG_FILES['auth'], Config.FAIL_LOGIN_PATTERN, 'Falha Login'),
@@ -205,7 +195,6 @@ class MonitorManager:
             daemon=True
         ))
         
-        # Configurar watchdog para monitorar arquivos
         self.observer = Observer()
         handler = FileChangeHandler()
         for file_path in Config.MONITOR_FILES:
@@ -215,7 +204,6 @@ class MonitorManager:
             else:
                 logging.warning(f"Diretório não encontrado: {directory}")
         
-        # Iniciar tudo
         for t in self.threads:
             t.start()
         
@@ -232,7 +220,6 @@ class MonitorManager:
 
 if __name__ == "__main__":
     setup_logging()
-    
     manager = MonitorManager()
     manager.start_monitoring()
     
