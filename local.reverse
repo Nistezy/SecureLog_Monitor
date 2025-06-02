@@ -1,0 +1,19 @@
+;
+; Arquivo de Zona Reversa - 192.168.1.0/24
+;
+$TTL    604800
+@       IN      SOA     ns1.nistezy.local. root.nistezy.local. (
+                                2025060101 ; Serial
+                                604800      ; Refresh
+                                86400       ; Retry
+                                2419200     ; Expire
+                                604800 )    ; Negative Cache TTL
+;
+@       IN      NS      ns1.nistezy.local.
+@       IN      NS      ns2.nistezy.local.
+
+; Mapeamento reverso
+1       IN      PTR     ns1.nistezy.local.
+2       IN      PTR     ns2.nistezy.local.
+9       IN      PTR     gateway.nistezy.local.
+100     IN      PTR     pc01.nistezy.local.
